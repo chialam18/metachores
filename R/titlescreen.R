@@ -125,8 +125,8 @@ titlescreen1 <- function(path,
     #summary sheet
     # general, number of 0, 1, and 2 for both
     # % and number discrepant discrepant between 0 vs. 1/2, 1 vs 2, and 0 vs. 2
-    tabyl (recodedf$jc) -> sumjc
-    tabyl (recodedf$ra) -> sumra
+    janitor::tabyl (recodedf$jc) -> sumjc
+    janitor::tabyl (recodedf$ra) -> sumra
     nrow(recodedf) -> total
     recodedf %>%
       dplyr::filter (jc!=ra) %>% nrow() %>% paste(., "of discrepancies out of", total, "recoded entries", sep =" ") -> discreptot
@@ -197,8 +197,8 @@ titlescreen1 <- function(path,
     #summary sheet
     # general, number of 0, 1, and 2 for both
     # % and number discrepant discrepant between 0 vs. 1/2, 1 vs 2, and 0 vs. 2
-    tabyl (merge$jc) -> sumjc
-    tabyl (merge$ra) -> sumra
+    janitor::tabyl (merge$jc) -> sumjc
+    janitor::tabyl (merge$ra) -> sumra
     nrow(merge) -> total
     merge %>%
       dplyr::filter (jc!=ra) %>% nrow() %>% paste(., "of discrepancies out of", total, sep =" ") -> discreptot
