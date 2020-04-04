@@ -1,0 +1,19 @@
+Package: metachores
+Title: tedious chores related to meta-analysis data collection
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "phoebe",
+           family = "lam",
+           role = c("aut", "cre"),
+           email = "phoebelam@u.northwestern.edu")
+Description: a bunch of functions that help jaycee with her meta chores.
+License: What license it uses
+Encoding: UTF-8
+LazyData: true
+Imports:
+	tibble,
+	xlsx,
+	dplyr,
+	tidyr,
+	gtools
+RoxygenNote: 7.1.0
