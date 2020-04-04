@@ -8,6 +8,11 @@ mergeclean(path, newfilename)
 }
 \description{
 merge together pubmed searches, add columns that index search phase, search terms, and search date\cr
-flag the duplicates, export an excel file
+flag the duplicates, export an excel file\cr
 remove the duplicates, add a searchid column, export another excel file
+}
+\examples{
+mergeclean(path="/Users/phoebelam/Google Drive/2020/4_meta_els sleep & inflammation/1_search_els & sleep",
+newfilename = "0_merged els & sleep")
+
 }

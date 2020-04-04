@@ -15,5 +15,8 @@ Imports:
 	xlsx,
 	dplyr,
 	tidyr,
-	gtools
+	gtools,
+	stringr,
+	janitor,
+	psych
 RoxygenNote: 7.1.0

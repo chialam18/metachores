@@ -1,3 +1,35 @@
+#' title screening specific for round 1 on sleep and inflammation
+#' 
+#' tasks performed:\cr
+#' 1.	merge together jc and ra responses\cr
+#' 2.	identify and only keep rows with discrepant codes \cr
+#' 3.	arrange the discrepant codes by jc 0 vs. ra 1/2; jc 1 vs. ra 0/2; jc 2 vs. ra 0/1\cr
+#' 4.	grab ra’s name from filename and place as column name\cr
+#' 5.	compute summary descriptives:\itemize{
+#' \item a.	total number of 0, 1, 2 by coder
+#' \item b.	total number of discrepancies
+#' \item c.	total number of each combination of discrepancies
+#' }
+#' 6.	repeat above steps for each identified ra file\cr
+#' 7.	for recode runs, the discrepancy summary and excel file will be based on second-round values only (i.e., only checking discrepancy in the recode file)\cr
+#'
+#' @examples 
+#' \strong{no recode has happened yet (use original jc coding):}
+#' titlescreen1(path="/Users/phoebelam/Google Drive/2020/4_meta_els sleep & inflammation/1_search_els & sleep/reliability",
+#' jc.filename = "0_merged els & sleep_11.1.19_jc.xlsx",
+#' jc.sheetnumber = 2,
+#' pattern="1_merged els & sleep_11.1.19_ra")
+#' 
+#' \strong{recode has happened (use jc second round coding):}
+#' titlescreen1(path="/Users/phoebelam/Google Drive/2020/4_meta_els sleep & inflammation/1_search_els & sleep/reliability",
+#' jc.filename = "0_merged els & sleep_11.1.19_jc.xlsx",
+#' jc.sheetnumber = 2,
+#' pattern="1_merged els & sleep_11.1.19_ra",
+#' recode=T,
+#' recode.ra = "pk")
+#' 
+#'
+#' @importFrom magrittr "%>%"
 #' @export
 titlescreen1 <- function(path,
                          jc.filename,
@@ -8,11 +40,8 @@ titlescreen1 <- function(path,
   # jc <- read.xlsx("0_merged els & sleep_11.1.19_jc.xlsx", sheetName = "pubmed_result (2)")
   # ra <- read.xlsx("reliability_ra screening/0_merged els & sleep_11.1.19_ra_kjk.xls", sheetIndex =1)
   
-  library (dplyr)
-  library (xlsx)
-  library (janitor)
-  library (stringr)
-  library (psych)
+  print (sample(imonit, 1))
+  Sys.sleep(5)
   
   setwd(path)
   
@@ -20,51 +49,51 @@ titlescreen1 <- function(path,
   
   #clean jc sheet
   jc %>%
-    rename(jc = include...1.unsure...2) %>%
-    filter (duplicate != "duplicate") %>%
-    select(jc, Title) %>%
-    filter (is.na(Title)==F & Title != "Title") %>%
-    mutate (jc = case_when(is.na(jc)==T~ 0,
+    dplyr::rename(jc = include...1.unsure...2) %>%
+    dplyr::filter (duplicate != "duplicate") %>%
+    dplyr::select(jc, Title) %>%
+    dplyr::filter (is.na(Title)==F & Title != "Title") %>%
+    dplyr::mutate (jc = dplyr::case_when(is.na(jc)==T~ 0,
                            TRUE~jc),
             rownumber = row_number()+1) -> jc
   
   if (recode == T) {
     jcrecode = list.files(path = path, pattern = "_recode", full.names = T, recursive = T)
-    recodedf <- read.xlsx(jcrecode, sheetIndex = 1)
+    recodedf <- xlsx::read.xlsx(jcrecode, sheetIndex = 1)
     
     #clean jc recoded sheet
     recodedf %>%
-      rename (jc_1st_round = jc) %>%
-      mutate (jc = case_when(is.na(consensus)==F~ consensus, 
+      dplyr::rename (jc_1st_round = jc) %>%
+      dplyr::mutate (jc = dplyr::case_when(is.na(consensus)==F~ consensus, 
                              is.na(jc_2nd_round)==F~ jc_2nd_round,
                              TRUE~ jc_1st_round)) %>%
-      select (jc, Title, rownumber) -> jcrecode
+      dplyr::select (jc, Title, rownumber) -> jcrecode
     
     jc %>%
-      filter (!rownumber %in% jcrecode$rownumber) -> jcnorecode
+      dplyr::filter (!rownumber %in% jcrecode$rownumber) -> jcnorecode
     
     rbind(jcnorecode, jcrecode) %>% 
-      arrange (rownumber) -> jc
+      dplyr::arrange (rownumber) -> jc
     
     #write out this jc file as an updated jc codes
-    jc1 <- read.xlsx(jc.filename, sheetIndex = jc.sheetnumber)
+    jc1 <- xlsx::read.xlsx(jc.filename, sheetIndex = jc.sheetnumber)
     jc1 %>%
-      rename (jc_1st_round = include...1.unsure...2) %>%
-      select(search.phase:Properties) %>%
-      mutate (rownumber = row_number()+1,
-              jc_1st_round = case_when(is.na(jc_1st_round)==T~ 0,
+      dplyr::rename (jc_1st_round = include...1.unsure...2) %>%
+      dplyr::select(search.phase:Properties) %>%
+      dplyr::mutate (rownumber = row_number()+1,
+              jc_1st_round = dplyr::case_when(is.na(jc_1st_round)==T~ 0,
                                        TRUE~jc_1st_round))-> jc1
     
     jc %>%
-      rename(jc_2nd_round = jc) %>%
-      select(-Title)-> update
+      dplyr::rename(jc_2nd_round = jc) %>%
+      dplyr::select(-Title)-> update
     
     merge(jc1, update, by = "rownumber") %>%
-      select(search.phase, jc_1st_round, jc_2nd_round, Title:Properties)-> update
+      dplyr::select(search.phase, jc_1st_round, jc_2nd_round, Title:Properties)-> update
     
-    str_locate_all(pattern ='_', jc.filename)[[1]][2, 1] -> loc
+    stringr::str_locate_all(pattern ='_', jc.filename)[[1]][2, 1] -> loc
     paste(str_sub(jc.filename,1,loc-1), "_jc_updated_", sep="") -> new
-    write.xlsx(update, paste(new, format(Sys.Date(), format="%m.%d.%y"), ".xlsx", sep=""), row.names=F)
+    xlsx::write.xlsx(update, paste(new, format(Sys.Date(), format="%m.%d.%y"), ".xlsx", sep=""), row.names=F)
     
     
     #special treatment for the particular ra with whom jc did recode
@@ -76,22 +105,22 @@ titlescreen1 <- function(path,
     gsub(recode.ra, "ra", colnames(recodedf)) -> colnames (recodedf)
     
     recodedf %>%
-      rename (jc_1st_round = jc,
+      dplyr::rename (jc_1st_round = jc,
               ra_1st_round = ra) %>%
-      mutate (jc = case_when(is.na(consensus)==F~ consensus, 
+      dplyr::mutate (jc = dplyr::case_when(is.na(consensus)==F~ consensus, 
                              is.na(jc_2nd_round)==F~ jc_2nd_round,
                              TRUE~ jc_1st_round),
-              ra = case_when(is.na(consensus)==F~ consensus,
+                     ra = dplyr::case_when(is.na(consensus)==F~ consensus,
                              is.na(ra_2nd_round)==F~ra_2nd_round,
                              TRUE~ jc_1st_round)) -> recodedf
     recodedf %>%
-      filter(jc != ra) %>%
-      select (rownumber, Title, jc, ra) %>%
-      arrange(jc, ra)-> trim
+      dplyr::filter(jc != ra) %>%
+      dplyr::select (rownumber, Title, jc, ra) %>%
+      dplyr::arrange(jc, ra)-> trim
     
     gsub("ra", recode.ra, colnames(trim)) -> colnames(trim)
     
-    write.xlsx(trim, paste("1_jc recode_", recode.ra, " recode_discrep_", format(Sys.Date(), format="%m.%d.%y"), ".xlsx", sep=""), row.names=F)
+    xlsx::write.xlsx(trim, paste("1_jc recode_", recode.ra, " recode_discrep_", format(Sys.Date(), format="%m.%d.%y"), ".xlsx", sep=""), row.names=F)
     
     #summary sheet
     # general, number of 0, 1, and 2 for both
@@ -100,19 +129,19 @@ titlescreen1 <- function(path,
     tabyl (recodedf$ra) -> sumra
     nrow(recodedf) -> total
     recodedf %>%
-      filter (jc!=ra) %>% nrow() %>% paste(., "of discrepancies out of", total, "recoded entries", sep =" ") -> discreptot
+      dplyr::filter (jc!=ra) %>% nrow() %>% paste(., "of discrepancies out of", total, "recoded entries", sep =" ") -> discreptot
     recodedf %>%
-      filter(jc == 0 & ra == 1) %>% nrow() %>% paste(., "where jc = 0, ra = 1", sep =" ") -> jc0ra1
+      dplyr::filter(jc == 0 & ra == 1) %>% nrow() %>% paste(., "where jc = 0, ra = 1", sep =" ") -> jc0ra1
     recodedf %>%
-      filter(jc == 0 & ra == 2) %>% nrow() %>% paste(., "where jc = 0, ra = 2", sep =" ") -> jc0ra2
+      dplyr::filter(jc == 0 & ra == 2) %>% nrow() %>% paste(., "where jc = 0, ra = 2", sep =" ") -> jc0ra2
     recodedf %>%
-      filter(jc == 1 & ra == 0) %>% nrow() %>% paste(., "where jc = 1, ra = 0", sep =" ") -> jc1ra0
+      dplyr::filter(jc == 1 & ra == 0) %>% nrow() %>% paste(., "where jc = 1, ra = 0", sep =" ") -> jc1ra0
     recodedf %>%
-      filter(jc == 1 & ra == 2) %>% nrow() %>% paste(., "where jc = 1, ra = 2", sep =" ") -> jc1ra2
+      dplyr::filter(jc == 1 & ra == 2) %>% nrow() %>% paste(., "where jc = 1, ra = 2", sep =" ") -> jc1ra2
     recodedf %>%
-      filter(jc == 2 & ra == 0) %>% nrow() %>% paste(., "where jc = 2, ra = 0", sep =" ") -> jc2ra0
+      dplyr::filter(jc == 2 & ra == 0) %>% nrow() %>% paste(., "where jc = 2, ra = 0", sep =" ") -> jc2ra0
     recodedf %>%
-      filter(jc == 2 & ra == 1) %>% nrow() %>% paste(., "where jc = 2, ra = 1", sep =" ") -> jc2ra1
+      dplyr::filter(jc == 2 & ra == 1) %>% nrow() %>% paste(., "where jc = 2, ra = 1", sep =" ") -> jc2ra1
     
     list (sumjc, sumra, discreptot, jc0ra1, jc0ra2, jc1ra0, jc1ra2, jc2ra0, jc2ra1) -> summary
     names(summary) <- c("number/% of 0,1,2 for jc", "number/% of 0,1,2 for ra", "number of discrepancies", 
@@ -133,12 +162,13 @@ titlescreen1 <- function(path,
     print (f)
     
     #clean ra sheet
-    ra <- read.xlsx(f, sheetIndex =1)
-    ra %>% filter (duplicate != "duplicate") %>%
-      rename (ra = X1...include.2...unsure) %>%
-      select (ra, Title) %>%
-      filter (is.na(Title)==F & Title != "Title") %>%
-      mutate (ra = case_when(is.na(ra)==T~ 0,
+    ra <- xlsx::read.xlsx(f, sheetIndex =1)
+    ra %>% 
+      dplyr::filter (duplicate != "duplicate") %>%
+      dplyr::rename (ra = X1...include.2...unsure) %>%
+      dplyr::select (ra, Title) %>%
+      dplyr::filter (is.na(Title)==F & Title != "Title") %>%
+      dplyr::mutate (ra = dplyr::case_when(is.na(ra)==T~ 0,
                              TRUE~as.numeric(as.character(ra)))) -> ra
     
     #merge
@@ -146,22 +176,22 @@ titlescreen1 <- function(path,
     
     #discrepancy sheet
     merge %>%
-      filter (jc!=ra) %>%
-      select (rownumber, Title, jc, ra) %>%
-      arrange (jc, ra) -> trim
+      dplyr::filter (jc!=ra) %>%
+      dplyr::select (rownumber, Title, jc, ra) %>%
+      dplyr::arrange (jc, ra) -> trim
     
     #grab initials
     basename(f) %>%
-      str_sub(.,-8,-6) %>%
+      stringr::str_sub(.,-8,-6) %>%
       gsub("_", "", .) -> initial
     colnames(trim) <- c("rownumber", "Title", "jc", initial)
     
     View (trim)
     
     if (recode == F){
-      write.xlsx(trim, paste("1_jc_", initial, "_discrep_", format(Sys.Date(), format="%m.%d.%y"), ".xlsx", sep=""), row.names=F)
+      xlsx::write.xlsx(trim, paste("1_jc_", initial, "_discrep_", format(Sys.Date(), format="%m.%d.%y"), ".xlsx", sep=""), row.names=F)
     } else {
-      write.xlsx(trim, paste("1_jc recode_", initial, "_discrep_", format(Sys.Date(), format="%m.%d.%y"), ".xlsx", sep=""), row.names=F)
+      xlsx::write.xlsx(trim, paste("1_jc recode_", initial, "_discrep_", format(Sys.Date(), format="%m.%d.%y"), ".xlsx", sep=""), row.names=F)
     }
     
     #summary sheet
@@ -171,19 +201,19 @@ titlescreen1 <- function(path,
     tabyl (merge$ra) -> sumra
     nrow(merge) -> total
     merge %>%
-      filter (jc!=ra) %>% nrow() %>% paste(., "of discrepancies out of", total, sep =" ") -> discreptot
+      dplyr::filter (jc!=ra) %>% nrow() %>% paste(., "of discrepancies out of", total, sep =" ") -> discreptot
     merge %>%
-      filter(jc == 0 & ra == 1) %>% nrow() %>% paste(., "where jc = 0, ra = 1", sep =" ") -> jc0ra1
+      dplyr::filter(jc == 0 & ra == 1) %>% nrow() %>% paste(., "where jc = 0, ra = 1", sep =" ") -> jc0ra1
     merge %>%
-      filter(jc == 0 & ra == 2) %>% nrow() %>% paste(., "where jc = 0, ra = 2", sep =" ") -> jc0ra2
+      dplyr::filter(jc == 0 & ra == 2) %>% nrow() %>% paste(., "where jc = 0, ra = 2", sep =" ") -> jc0ra2
     merge %>%
-      filter(jc == 1 & ra == 0) %>% nrow() %>% paste(., "where jc = 1, ra = 0", sep =" ") -> jc1ra0
+      dplyr::filter(jc == 1 & ra == 0) %>% nrow() %>% paste(., "where jc = 1, ra = 0", sep =" ") -> jc1ra0
     merge %>%
-      filter(jc == 1 & ra == 2) %>% nrow() %>% paste(., "where jc = 1, ra = 2", sep =" ") -> jc1ra2
+      dplyr::filter(jc == 1 & ra == 2) %>% nrow() %>% paste(., "where jc = 1, ra = 2", sep =" ") -> jc1ra2
     merge %>%
-      filter(jc == 2 & ra == 0) %>% nrow() %>% paste(., "where jc = 2, ra = 0", sep =" ") -> jc2ra0
+      dplyr::filter(jc == 2 & ra == 0) %>% nrow() %>% paste(., "where jc = 2, ra = 0", sep =" ") -> jc2ra0
     merge %>%
-      filter(jc == 2 & ra == 1) %>% nrow() %>% paste(., "where jc = 2, ra = 1", sep =" ") -> jc2ra1
+      dplyr::filter(jc == 2 & ra == 1) %>% nrow() %>% paste(., "where jc = 2, ra = 1", sep =" ") -> jc2ra1
     
     list (sumjc, sumra, discreptot, jc0ra1, jc0ra2, jc1ra0, jc1ra2, jc2ra0, jc2ra1) -> summary
     names(summary) <- c("number/% of 0,1,2 for jc", "number/% of 0,1,2 for ra", "number of discrepancies", 
@@ -196,6 +226,6 @@ titlescreen1 <- function(path,
     }
   }
   
-  print("donzo!")
+  print (sample(donzo, 1))
 }
 
