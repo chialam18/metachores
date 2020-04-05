@@ -80,7 +80,7 @@ titlescreen1 <- function(path,
     jc1 %>%
       dplyr::rename (jc_1st_round = include...1.unsure...2) %>%
       dplyr::select(search.phase:Properties) %>%
-      dplyr::mutate (rownumber = dpylr::row_number()+1,
+      dplyr::mutate (rownumber = dplyr::row_number()+1,
               jc_1st_round = dplyr::case_when(is.na(jc_1st_round)==T~ 0,
                                        TRUE~jc_1st_round))-> jc1
 
