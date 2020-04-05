@@ -4,7 +4,11 @@
 #'
 #' merge together pubmed searches, add columns that index search phase, search terms, and search date\cr
 #' flag the duplicates, export an excel file\cr
-#' remove the duplicates, add a searchid column, export another excel file
+#' remove the duplicates, add a searchid column, export another excel file\cr
+#' video tutorial:\href{https://youtu.be/3zj1b8jar28}{https://youtu.be/3zj1b8jar28}
+#'
+#' @param path the folder where each pubmed .csv export files are stored
+#' @param newfilename the name of the two new consolidated excel files without the extension
 #'
 #' @examples
 #' mergeclean(path="/Users/phoebelam/Google Drive/2020/4_meta_els sleep & inflammation/1_search_els & sleep",

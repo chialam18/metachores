@@ -13,6 +13,19 @@ titlescreen1(
   recode.ra = NULL
 )
 }
+\arguments{
+\item{path}{the folder where both jc and ra files are located (ra files can be in subfolder of this folder)}
+
+\item{jc.filename}{the filename of the jc file including the extension}
+
+\item{jc.sheetnumber}{without quotations, the sheet number counted from the left in which jc codes are logged. include hidden sheets in your count.}
+
+\item{pattern}{pattern by which the function will look for ra files; ensure that the pattern exclusively applies to ra files, excluding the template file}
+
+\item{recode}{FALSE or F: will use jc codes from jc.filename specified above. FALSE is the default value when unspecified; TRUE or T: will use jc codes from the recode file. function will look for the pattern “_recode”, so make sure those exact characters are in filename and make sure this recode file is inside the folder specified as path earlier}
+
+\item{recode.ra}{the initial of the ra (must match the ones on their filename). NULL is the default value when unspecified.}
+}
 \description{
 tasks performed:\cr
 1.	merge together jc and ra responses\cr
@@ -26,6 +39,8 @@ tasks performed:\cr
 }
 6.	repeat above steps for each identified ra file\cr
 7.	for recode runs, the discrepancy summary and excel file will be based on second-round values only (i.e., only checking discrepancy in the recode file)\cr
+\cr
+video tutorial: \href{https://youtu.be/aQQVP_KCJck}{https://youtu.be/aQQVP_KCJck}
 }
 \examples{
 \strong{no recode has happened yet (use original jc coding):}
