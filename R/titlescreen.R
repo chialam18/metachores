@@ -92,7 +92,7 @@ titlescreen1 <- function(path,
       dplyr::select(search.phase, jc_1st_round, jc_2nd_round, Title:Properties)-> update
 
     stringr::str_locate_all(pattern ='_', jc.filename)[[1]][2, 1] -> loc
-    paste(str_sub(jc.filename,1,loc-1), "_jc_updated_", sep="") -> new
+    paste(stringr::str_sub(jc.filename,1,loc-1), "_jc_updated_", sep="") -> new
     xlsx::write.xlsx(update, paste(new, format(Sys.Date(), format="%m.%d.%y"), ".xlsx", sep=""), row.names=F)
 
 
