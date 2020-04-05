@@ -55,7 +55,7 @@ titlescreen1 <- function(path,
     dplyr::filter (is.na(Title)==F & Title != "Title") %>%
     dplyr::mutate (jc = dplyr::case_when(is.na(jc)==T~ 0,
                            TRUE~jc),
-            rownumber = row_number()+1) -> jc
+            rownumber = dplyr::row_number()+1) -> jc
 
   if (recode == T) {
     jcrecode = list.files(path = path, pattern = "_recode", full.names = T, recursive = T)
