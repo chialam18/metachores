@@ -58,6 +58,11 @@ method <- function (path) {
               ~case_when(is.na(.)==T~ "missing", TRUE~.))-> dat
   
   dat %>%
+    filter(is.na(sample.notes_jp)==F & is.na(sample.notes_kk)==T |
+             is.na(sample.notes_jp)==F & is.na(sample.notes_ma)==T) %>%
+    select(link.id, sample.notes_jp, sample.notes_kk, sample.notes_ma) -> samplenotes
+  
+  dat %>%
     filter(iv.assessment_jp != iv.assessment_kk | 
              iv.assessment_jp != iv.assessment_ma) %>% 
     select (link.id, iv.assessment_jp, iv.assessment_kk, iv.assessment_ma) -> iv.ass
@@ -167,7 +172,7 @@ method <- function (path) {
              adiposity_jp != adiposity_ma) %>% 
     select (link.id, adiposity_jp, adiposity_kk, adiposity_ma) -> adiposity
   
-  list (iv.ass, iv.time, iv.agemean, iv.agesd, iv.agerange, dv.ass, dv.time, dv.agemean, dv.agesd, dv.agerange,
+  list (samplenotes, iv.ass, iv.time, iv.agemean, iv.agesd, iv.agerange, dv.ass, dv.time, dv.agemean, dv.agesd, dv.agerange,
         design, female, white, black, latino, asian, other, psychiatric, physical, subgroupna, country, adiposity) -> summary
   
   capture.output(summary, file = paste(path, "/method discrepancies_", format(Sys.Date(), format="%m.%d.%y"), ".txt", sep=""))
