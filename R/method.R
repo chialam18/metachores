@@ -7,15 +7,17 @@
 #' compute summary descriptives of # discrepancies
 #'
 #' @param path the folder where each pubmed .csv export files are stored
-#' @param newfilename the name of the two new consolidated excel files without the extension
+#' @param start the link.id to begin checking, put in quotes
+#' @param end the link.id to end checking, put in quotes
 #'
 #' @examples
-#' mergeclean(path="/Users/phoebelam/Google Drive/2020/4_meta_els sleep & inflammation/1_search_els & sleep",
-#' newfilename = "0_merged els & sleep")
+#' method(path="/Users/phoebelam/Google Drive/2020/4_meta_els sleep & inflammation/1_search_els & sleep", start = "a21_1", end = "a30b_1")
 #'
 #' @importFrom magrittr "%>%"
 #' @export
-method <- function (path) {
+method <- function (path, start, end) {
+
+
   print (sample(imonit, 1))
   Sys.sleep(5)
 
@@ -43,6 +45,11 @@ method <- function (path) {
   #merge
   dat <- merge(merge(jp, kk, by = "link.id"), ma, by = "link.id")
 
+  which(dat$link.id == start) -> startrow
+  which(dat$link.id == end) -> endrow
+
+  dat[startrow:endrow, ] -> dat
+
   # # if long format
   # filenames = list.files(path = path, pattern = ".csv", full.names = TRUE, recursive = FALSE)
   # all = lapply(filenames, read.csv, na.strings="")
@@ -53,6 +60,9 @@ method <- function (path) {
   #
   # all %>%
   #   filter (is.na(link.id)==F)
+
+  # remove excluded links
+  dat %>% filter (exclude_jp == 0 & exclude_ma == 0 & exclude_kk == 0) -> dat
 
   #discrepancies
   dat %>%
@@ -208,5 +218,15 @@ method <- function (path) {
   # capture.output(summary, file = paste(path, "/method discrepancies_", format(Sys.Date(), format="%m.%d.%y"), ".txt", sep=""))
 
   print (sample(donzo, 1))
+
 }
+
+
+
+
+
+
+
+
+
 

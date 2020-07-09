@@ -2,5 +2,6 @@
 
 export(mergeclean)
 export(method)
+export(method_stats)
 export(titlescreen1)
 importFrom(magrittr,"%>%")
