@@ -4,7 +4,6 @@
 #'
 #' merge together coder sheets\cr
 #' identify and only keep discrepant rows \cr
-#' compute summary descriptives of # discrepancies
 #'
 #' @param path the folder where each pubmed .csv export files are stored
 #' @param start the link.id to begin checking, put in quotes
@@ -62,7 +61,7 @@ method <- function (path, start, end) {
   #   filter (is.na(link.id)==F)
 
   # remove excluded links
-  dat %>% filter (exclude_jp == 0 & exclude_ma == 0 & exclude_kk == 0) -> dat
+  dat %>% dplyr::filter (exclude_jp == 0 & exclude_ma == 0 & exclude_kk == 0) -> dat
 
   #discrepancies
   dat %>%

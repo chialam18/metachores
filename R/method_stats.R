@@ -12,27 +12,26 @@
 #' @importFrom magrittr "%>%"
 #' @export
 method_stats <- function(path, start, end) {
-  
+
   print (sample(imonit, 1))
   Sys.sleep(5)
-  
+
   raw <- read.csv(paste(path, "/method extraction - method.csv", sep=""), na.strings = "")
   which(raw$link.id == start) -> startrow
   which(raw$link.id == end) -> endrow
   raw[startrow:endrow, ] -> raw
-  
 
-  path2 <- paste(path, "/method discrepancies_07.08.20.xlsx", sep = "")
-  
-  path2 %>% 
-    readxl::excel_sheets() %>% 
-    purrr::set_names() %>% 
-    purrr::map(read_excel, path = path2) -> disc
+  path2<- list.files(path, pattern = "xlsx", full.names = TRUE, recursive = FALSE)
+
+  path2 %>%
+    readxl::excel_sheets() %>%
+    purrr::set_names() %>%
+    purrr::map(readxl::read_excel, path = path2) -> disc
 
   lapply(names(disc), function(x) assign(x, disc[[x]], envir = .GlobalEnv))
 
   tot <- endrow - startrow + 1
-  
+
   discrep_percent = round (c(nrow(`sample notes`)/nrow(filter(raw, is.na(article.id)==F))*100,
                       nrow(iv.assessment)/tot*100,
                       nrow(iv.timeframe)/tot*100,
@@ -56,7 +55,7 @@ method_stats <- function(path, start, end) {
                       nrow(subgroupna)/tot*100,
                       nrow(country)/tot*100,
                       nrow(adiposity)/tot*100), 2)
-  
+
   discrep = c(nrow(`sample notes`),
               nrow(iv.assessment),
               nrow(iv.timeframe),
@@ -80,27 +79,37 @@ method_stats <- function(path, start, end) {
               nrow(subgroupna),
               nrow(country),
               nrow(adiposity))
-  
+
   total = c(nrow(filter(raw, is.na(article.id)==F)),
             rep(tot, length(discrep)-1))
-  
+
   summary <- list("total" = total,
                   "# discrepancies" = discrep,
                   "% discrepant" = discrep_percent)
-  
+
   output <- matrix(unlist(summary), ncol = 3, byrow = FALSE)
-  
-  
+
   rownames(output) <- c("sample notes", "iv.assessment", "iv.timeframe", "iv.agemean", "iv.agesd", "iv.agerange",
-                        "dv.assessment", "dv.timeframe", "dv.agemean", "dv.agesd", "dv.agerange", 
+                        "dv.assessment", "dv.timeframe", "dv.agemean", "dv.agesd", "dv.agerange",
                         "design", "female", "white", "black", "latino", "asian", "other",
                         "psychiatric", "physical", "subgroupna", "country", "adiposity")
-  
+
   colnames(output) <- c("total", "# discrepancies", "% discrepant")
-  
-  capture.output(output, file = paste(path, "/method discrepancies_aggregates_", format(Sys.Date(), format="%m.%d.%y"), ".txt", sep=""))
-  
+
+  output <- output[order(output[,3], decreasing=TRUE),]
+
+  descrip <- psych::describe(discrep_percent)
+
+  final <- list ("discrepancies" = output,
+        "percent discrepancies aggregates" = descrip)
+
+  capture.output(final, file = paste(path, "/method discrepancies_aggregates_", format(Sys.Date(), format="%m.%d.%y"), ".txt", sep=""))
+
   print (sample(donzo, 1))
-  
-  
+
+
+
+
+
+
 }

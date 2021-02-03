@@ -11,12 +11,17 @@
 #' @param newfilename the name of the two new consolidated excel files without the extension
 #'
 #' @examples
-#' mergeclean(path="/Users/phoebelam/Google Drive/2020/4_meta_els sleep & inflammation/1_search_els & sleep",
+#' mergeclean(path="/Users/phoebelam/Google Drive/2021/4_meta_els sleep & inflammation/1_search_els & sleep",
 #' newfilename = "0_merged els & sleep")
 #'
 #' @importFrom magrittr "%>%"
 #' @export
 mergeclean <- function (path, newfilename) {
+
+  #troubleshoot
+  # path="/Users/phoebelam/Google Drive/2021/1_meta_els & inflammation/1_search/third search/individual files"
+  # f = "/Users/phoebelam/Google Drive/2021/1_meta_els & inflammation/1_search/third search/individual files/1_early adversity & inflammation_2.3.21.csv"
+  # newfilename = "0_merged els & inflammation"
 
   print (sample(imonit, 1))
 
@@ -31,10 +36,8 @@ mergeclean <- function (path, newfilename) {
   for (f in filenames) {
     print (f)
 
-    dat <- read.csv(f, header =F)[-1,]
-    # dat <- read.csv("2_childhood maltreatment or childhood abuse or childhood neglect & sleep_10.28.19.csv", header = F)[-1, ]
-
-    colnames(dat) <- c("Title",	"URL",	"Description",	"Details",	"ShortDetails",	"Resource",	"Type",	"Identifiers",	"Db",	"EntrezUID", "Properties", "junk")
+    dat <- read.csv(f)
+    # dat <- read.csv("9_child maltreatment & inflammation_2.3.21.csv")
 
     dat %>%
       dplyr::mutate (search = as.character(basename(f))) %>%
@@ -50,12 +53,14 @@ mergeclean <- function (path, newfilename) {
   consol %>%
     dplyr::mutate (duplicate = dplyr::case_when(duplicated(Title)==T~ "duplicate",
                                   TRUE~ "unique")) %>%
-    dplyr::select(search_phase, search_terms, search_date, duplicate, Title, URL, Description, Details, ShortDetails, Resource, Type, Db, EntrezUID, Properties)-> consol
+    dplyr::select(search_phase, search_terms, search_date, duplicate, Title:Publication.Year, PMID, Create.Date:DOI) %>%
+    arrange (as.numeric(search_phase))-> consol
 
   consol %>%
     dplyr::distinct(Title, .keep_all = T) %>%
     dplyr::mutate (screenid = row_number()) %>%
-    dplyr::select(screenid, search_phase, search_terms, search_date, Title, URL, Description, Details, ShortDetails, Resource, Type, Db, EntrezUID, Properties)-> nodup
+    dplyr::select(screenid, search_phase, search_terms, search_date, Title:Publication.Year, PMID, Create.Date:DOI) %>%
+    arrange (as.numeric(search_phase)) -> nodup
 
   file.remove(paste(newfilename, "_temp.RDS", sep=""))
 

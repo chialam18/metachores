@@ -16,7 +16,6 @@ method(path, start, end)
 \description{
 merge together coder sheets\cr
 identify and only keep discrepant rows \cr
-compute summary descriptives of # discrepancies
 }
 \examples{
 method(path="/Users/phoebelam/Google Drive/2020/4_meta_els sleep & inflammation/1_search_els & sleep", start = "a21_1", end = "a30b_1")

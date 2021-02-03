@@ -18,7 +18,7 @@ remove the duplicates, add a searchid column, export another excel file\cr
 video tutorial:\href{https://youtu.be/3zj1b8jar28}{https://youtu.be/3zj1b8jar28}
 }
 \examples{
-mergeclean(path="/Users/phoebelam/Google Drive/2020/4_meta_els sleep & inflammation/1_search_els & sleep",
+mergeclean(path="/Users/phoebelam/Google Drive/2021/4_meta_els sleep & inflammation/1_search_els & sleep",
 newfilename = "0_merged els & sleep")
 
 }
